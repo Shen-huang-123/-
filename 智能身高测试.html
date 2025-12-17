@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height Tech - 智能身高测试系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Roboto", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #f8fafc;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 粒子背景容器 */
+        #particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 科技感容器 */
+        .container {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+            padding: 50px 35px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 标题样式 */
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #3b82f6, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+        }
+
+        /* 输入框 - 科技风 */
+        .input-box {
+            width: 100%;
+            padding: 16px 22px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            color: #e2e8f0;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .input-box:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .input-box::placeholder {
+            color: #64748b;
+        }
+
+        /* 按钮组 */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 35px;
+        }
+
+        .test-btn, .reset-btn {
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .test-btn {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: #fff;
+        }
+
+        .test-btn:hover {
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .reset-btn {
+            background: rgba(15, 23, 42, 0.5);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .reset-btn:hover {
+            background: rgba(15, 23, 42, 0.7);
+            color: #e2e8f0;
+            border-color: #64748b;
+        }
+
+        /* 结果展示区 - 科技感面板 */
+        .result-panel {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 15px;
+            padding: 30px 25px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-panel.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 不同结果的面板样式 */
+        .result-panel.high {
+            border-color: rgba(34, 197, 94, 0.4);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+        }
+        .result-panel.medium {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        .result-panel.low {
+            border-color: rgba(249, 115, 22, 0.4);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
+        }
+
+        .height-result {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 不同结果的数字渐变 */
+        .height-result.high span {
+            background: linear-gradient(90deg, #22c55e, #86efac);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .height-result.medium span {
+            background: linear-gradient(90deg, #3b82f6, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .height-result.low span {
+            background: linear-gradient(90deg, #f97316, #fdba74);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .height-analysis {
+            font-size: 15px;
+            line-height: 1.8;
+            max-width: 500px;
+            position: relative;
+            z-index: 2;
+        }
+        .height-analysis.high {
+            color: #a7f3d0;
+        }
+        .height-analysis.medium {
+            color: #94a3b8;
+        }
+        .height-analysis.low {
+            color: #fed7aa;
+        }
+
+        /* 结果面板背景动效 */
+        .result-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        .result-bg.high {
+            background: radial-gradient(circle at center, #22c55e 0%, transparent 70%);
+        }
+        .result-bg.medium {
+            background: radial-gradient(circle at center, #3b82f6 0%, transparent 70%);
+        }
+        .result-bg.low {
+            background: radial-gradient(circle at center, #f97316 0%, transparent 70%);
+        }
+
+        /* 数字滚动动效 */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .height-num-animate {
+            display: inline-block;
+            animation: countUp 0.8s ease-out forwards;
+        }
+        .height-num-animate:nth-child(1) { animation-delay: 0.1s; }
+        .height-num-animate:nth-child(2) { animation-delay: 0.2s; }
+        .height-num-animate:nth-child(3) { animation-delay: 0.3s; }
+        .height-num-animate:nth-child(4) { animation-delay: 0.4s; }
+        .height-num-animate:nth-child(5) { animation-delay: 0.5s; }
+
+        /* 科技装饰元素 */
+        .decor {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.1);
+            filter: blur(80px);
+            z-index: -1;
+        }
+        .decor-1 { top: 10%; left: 15%; }
+        .decor-2 { bottom: 10%; right: 15%; }
+
+        /* 响应式适配 */
+        @media (max-width: 550px) {
+            .container { padding: 40px 25px; }
+            .title { font-size: 28px; }
+            .btn-group { flex-direction: column; }
+            .test-btn, .reset-btn { width: 100%; padding: 14px 0; }
+            .height-result { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 粒子背景容器 -->
+    <div id="particle-container"></div>
+    <!-- 科技感背景装饰 -->
+    <div class="decor decor-1"></div>
+    <div class="decor decor-2"></div>
+
+    <div class="container">
+        <h1 class="title">Height Tech 智能测试系统</h1>
+        <p class="subtitle">输入任意文本，AI 算法生成随机身高数据 | 趣味测试 · 仅供娱乐</p>
+
+        <input type="text" class="input-box" id="inputText" placeholder="请输入任意内容（如姓名/编号）">
+
+        <div class="btn-group">
+            <button class="test-btn" id="testBtn">启动测试</button>
+            <button class="reset-btn" id="resetBtn">重置系统</button>
+        </div>
+
+        <div class="result-panel" id="resultPanel">
+            <div class="result-bg" id="resultBg"></div>
+            <div class="height-result" id="heightResult">测试结果：<span id="heightNum">000.0</span> cm</div>
+            <div class="height-analysis" id="heightAnalysis">系统正在分析数据，请稍候...</div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== 核心变量与DOM =====================
+        const inputText = document.getElementById('inputText');
+        const testBtn = document.getElementById('testBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const heightResult = document.getElementById('heightResult');
+        const heightNum = document.getElementById('heightNum');
+        const heightAnalysis = document.getElementById('heightAnalysis');
+        const resultBg = document.getElementById('resultBg');
+        const particleContainer = document.getElementById('particle-container');
+
+        // ===================== 音效资源（可选，需自行替换路径） =====================
+        const soundHigh = new Audio('https://example.com/high.mp3'); // 高身高音效
+        const soundMedium = new Audio('https://example.com/medium.mp3'); // 中等身高音效
+        const soundLow = new Audio('https://example.com/low.mp3'); // 低身高音效
+        // 音效播放函数
+        function playSound(type) {
+            try {
+                switch(type) {
+                    case 'high': soundHigh.currentTime = 0; soundHigh.play(); break;
+                    case 'medium': soundMedium.currentTime = 0; soundMedium.play(); break;
+                    case 'low': soundLow.currentTime = 0; soundLow.play(); break;
+                }
+            } catch (e) { /* 忽略音效加载失败 */ }
+        }
+
+        // ===================== 粒子动效函数 =====================
+        function createParticles(type) {
+            // 清空现有粒子
+            particleContainer.innerHTML = '';
+            
+            // 粒子颜色
+            let color = '#3b82f6';
+            if (type === 'high') color = '#22c55e';
+            if (type === 'low') color = '#f97316';
+
+            // 创建20个粒子
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = `${Math.random() * 10 + 5}px`;
+                particle.style.height = particle.style.width;
+                particle.style.borderRadius = '50%';
+                particle.style.background = color;
+                particle.style.opacity = Math.random() * 0.5 + 0.2;
+                particle.style.zIndex = '0';
+                
+                // 初始位置（结果面板中心）
+                const panelRect = resultPanel.getBoundingClientRect();
+                const centerX = panelRect.left + panelRect.width / 2;
+                const centerY = panelRect.top + panelRect.height / 2;
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+                
+                // 动画参数
+                const angle = Math.random() * Math.PI * 2; // 随机角度
+                const distance = Math.random() * 100 + 50; // 随机距离
+                const duration = Math.random() * 1 + 0.5; // 动画时长
+                
+                // 设置动画
+                particle.style.transition = `all ${duration}s ease-out`;
+                particleContainer.appendChild(particle);
+                
+                // 触发动画
+                setTimeout(() => {
+                    particle.style.left = `${centerX + Math.cos(angle) * distance}px`;
+                    particle.style.top = `${centerY + Math.sin(angle) * distance}px`;
+                    particle.style.opacity = '0';
+                }, 10);
+                
+                // 移除粒子
+                setTimeout(() => {
+                    particle.remove();
+                }, duration * 1000);
+            }
+        }
+
+        // ===================== 数字滚动动效 =====================
+        function animateHeightNumber(num, type) {
+            // 格式化数字（保留1位小数）
+            const numStr = num.toString().padStart(5, '0'); // 补零到5位（如 175.5 → 175.5，160 → 160.0）
+            let html = '';
+            
+            // 拆分数字为单个字符，添加动画类
+            for (let i = 0; i < numStr.length; i++) {
+                html += `<span class="height-num-animate">${numStr[i]}</span>`;
+            }
+            
+            heightNum.innerHTML = html;
+            // 添加结果类型样式
+            heightResult.className = `height-result ${type}`;
+        }
+
+        // ===================== 测试核心逻辑 =====================
+        // 分析文案库（按身高类型分类）
+        const analysisLib = {
+            high: [
+                "【高能预警】身高维度远超均值！身体机能协调性极佳，适配各类运动场景，建议重点发展体态管理。",
+                "【顶级数据】身高优势显著，骨骼发育状态优秀，继续保持高蛋白饮食，可进一步提升身体表现。",
+                "【系统评级S】身高数据卓越，视觉比例突出，注意避免久坐，保持挺拔体态更显优势。"
+            ],
+            medium: [
+                "【标准数据】身高处于黄金区间，骨骼发育均衡，日常保持30分钟有氧运动即可维持最佳状态。",
+                "【算法评估B+】身高适配多数生活场景，身体灵活性与稳定性平衡，建议补充钙质增强骨骼密度。",
+                "【均衡发展】身高均值水平，无明显短板，重点优化作息习惯，提升整体健康评分。"
+            ],
+            low: [
+                "【潜力分析】身高略低但灵活性突出，适合技巧型运动，纵向拉伸训练可有效改善视觉比例。",
+                "【优化建议】身高受遗传影响较大，每日2杯牛奶+15分钟拉伸，可最大化发育潜力。",
+                "【特色优势】身高小巧敏捷，身体反应速度快，健康指标优先级高于身高数值，无需过度关注。"
+            ]
+        };
+
+        // 生成随机身高并展示
+        function runHeightTest() {
+            if (!inputText.value.trim()) {
+                alert("请先输入测试文本！");
+                return;
+            }
+
+            // 重置面板样式
+            resultPanel.className = 'result-panel';
+            heightResult.className = 'height-result';
+            heightAnalysis.className = 'height-analysis';
+            resultBg.className = 'result-bg';
+
+            // 生成 140.0 - 200.0 cm 随机身高
+            const min = 140.0;
+            const max = 200.0;
+            const randomHeight = (Math.random() * (max - min) + min).toFixed(1);
+            let heightType = 'medium';
+            
+            // 判断身高类型
+            if (parseFloat(randomHeight) >= 180) heightType = 'high';
+            if (parseFloat(randomHeight) <= 160) heightType = 'low';
+
+            // 随机选择对应类型的分析文案
+            const analysisList = analysisLib[heightType];
+            const randomDesc = analysisList[Math.floor(Math.random() * analysisList.length)];
+
+            // 添加类型样式
+            resultPanel.classList.add('active', heightType);
+            resultBg.classList.add(heightType);
+            heightAnalysis.classList.add(heightType);
+
+            // 数字动效
+            animateHeightNumber(randomHeight, heightType);
+            
+            // 延迟设置分析文案（配合动画节奏）
+            setTimeout(() => {
+                heightAnalysis.textContent = randomDesc;
+                // 播放音效
+                playSound(heightType);
+                // 创建粒子动效
+                createParticles(heightType);
+            }, 600);
+        }
+
+        // ===================== 重置功能 =====================
+        function resetSystem() {
+            inputText.value = "";
+            resultPanel.classList.remove('active', 'high', 'medium', 'low');
+            resultBg.classList.remove('high', 'medium', 'low');
+            heightResult.className = 'height-result';
+            heightAnalysis.className = 'height-analysis';
+            heightNum.textContent = "000.0";
+            heightAnalysis.textContent = "系统正在分析数据，请稍候...";
+            // 清空粒子
+            particleContainer.innerHTML = '';
+        }
+
+        // ===================== 事件绑定 =====================
+        testBtn.addEventListener('click', runHeightTest);
+        resetBtn.addEventListener('click', resetSystem);
+        inputText.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') runHeightTest();
+        });
+    </script>
+</body>
+</html>
